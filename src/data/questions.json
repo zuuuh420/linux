@@ -1,0 +1,2160 @@
+[
+  {
+    "id": "6a2986d1cdb2f7bb329cf2ec",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本：输入5个学生成绩，计算总分、平均分（保留1位小数）、最高分和最低分，并输出统计结果。",
+    "options": [],
+    "answer": "#!/bin/bash\nsum=0\nmax=0\nmin=100\nfor i in 1 2 3 4 5\ndo\n    read -p \"请输入第${i}个学生的成绩: \" score\n    sum=$(( sum + score ))\n    if [ $score -gt $max ]; then\n        max=$score\n    fi\n    if [ $score -lt $min ]; then\n        min=$score\n    fi\ndone\navg=$(echo \"scale=1; $sum/5\" | bc)\necho \"总分: $sum\"\necho \"平均分: $avg\"\necho \"最高分: $max\"\necho \"最低分: $min\"",
+    "explanation": "核心要点：1)变量初始化(sum=0,max=0,min=100)；2)for循环5次；3)read -p交互输入；4)$(())整数加法；5)-gt/-lt条件判断；6)bc计算小数平均分(scale=1)。",
+    "tags": [
+      "for循环",
+      "bc",
+      "最大最小值",
+      "成绩统计"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f6",
+    "type": "short_answer",
+    "difficulty": "hard",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "解释以下命令的完整含义，并说明执行后文件的权限是什么：\nchmod 764 myfile.txt",
+    "options": [],
+    "answer": "命令含义：将myfile.txt的权限设置为八进制764。\n\n权限分解：\n- 7 = 4+2+1 = rwx（所有者：可读可写可执行）\n- 6 = 4+2+0 = rw-（所属组：可读可写）\n- 4 = 4+0+0 = r--（其他人：只读）\n\n完整权限：rwxrw-r--",
+    "explanation": "八进制权限计算：每位数字拆分为4(r)+2(w)+1(x)，有则取对应数字，无则取0。掌握此规律可快速换算任意权限。",
+    "tags": [
+      "chmod",
+      "权限计算",
+      "八进制"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2fa",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第8章",
+    "section": "8.2",
+    "question": "简述 /etc/passwd 文件的格式，并解释每个字段的含义（以 root:x:0:0:root:/root:/bin/bash 为例）。",
+    "options": [],
+    "answer": "/etc/passwd 格式（7个字段，冒号分隔）：\n用户名:密码占位符:UID:GID:注释:主目录:登录Shell\n\n以 root:x:0:0:root:/root:/bin/bash 为例：\n- root：用户名\n- x：密码（实际存在/etc/shadow中，x是占位符）\n- 0：UID（用户ID，root的UID是0）\n- 0：GID（组ID，root组的GID是0）\n- root：注释信息（全名）\n- /root：用户主目录\n- /bin/bash：登录后使用的Shell程序",
+    "explanation": "/etc/passwd是Linux用户信息的核心文件，每行代表一个用户，7个字段用冒号分隔。记忆口诀：名密ID组注目Shell。",
+    "tags": [
+      "/etc/passwd",
+      "用户管理",
+      "文件格式"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2ef",
+    "type": "shell_coding",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本：使用while循环，从1数到5，每次输出当前数字。",
+    "options": [],
+    "answer": "#!/bin/bash\ni=1\nwhile [ $i -le 5 ]\ndo\n    echo $i\n    i=$(( i + 1 ))\ndone",
+    "explanation": "while循环：初始化变量i=1；[ $i -le 5 ]作为循环条件（-le小于等于）；循环体中输出i并用$(())将i加1；以done结束。",
+    "tags": [
+      "while循环",
+      "-le",
+      "计数"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f2",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "解释Shell脚本中以下特殊变量的含义：$0、$1、$#、$*、$?",
+    "options": [],
+    "answer": "$0 ：脚本文件名本身\n$1 ：第1个命令行参数\n$# ：命令行参数的个数（不含$0）\n$* ：所有命令行参数（作为一个整体字符串）\n$? ：上一条命令的退出状态码（0表示成功，非0表示失败）",
+    "explanation": "这些是Shell的位置参数和特殊变量，是编写通用脚本的基础。$?尤其重要，常用于判断上一条命令是否执行成功。",
+    "tags": [
+      "特殊变量",
+      "位置参数",
+      "$?"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f7",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "完成以下权限操作：\n1. 给 script.sh 的所有者添加执行权限\n2. 将 data.txt 权限设为所有者可读写，其他人无权限\n3. 去掉 public.txt 中其他人的写权限",
+    "options": [],
+    "answer": "1. chmod u+x script.sh\n   （或 chmod +x script.sh 也可）\n\n2. chmod 600 data.txt\n   （6=rw-, 0=---, 0=---，即只有所有者可读写）\n   （或 chmod u=rw,go= data.txt）\n\n3. chmod o-w public.txt\n   （o=other, -w=去掉写权限）",
+    "explanation": "权限操作两种方式：八进制（绝对模式，直接设定所有权限）和符号模式（相对模式，只修改指定权限）。考试两种都要掌握。",
+    "tags": [
+      "chmod",
+      "权限操作",
+      "实践"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f3",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.8",
+    "question": "下列Shell条件测试中，用于判断文件是否存在的选项是？",
+    "options": [
+      "A. -d",
+      "B. -f",
+      "C. -e",
+      "D. -x"
+    ],
+    "answer": "C",
+    "explanation": "-e(exist)：文件存在（不区分类型）；-f：是普通文件；-d：是目录；-x：文件有执行权限；-r：有读权限；-w：有写权限。",
+    "tags": [
+      "文件测试",
+      "-e",
+      "条件判断"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f0",
+    "type": "short_answer",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "下面Shell脚本有什么错误？请指出并改正：\nsum=0\nfor i in 1 2 3 4 5\ndo\n  sum = $sum + $i\ndone\necho $sum",
+    "options": [],
+    "answer": "错误1：sum = $sum + $i 赋值号两侧不能有空格，且这样写无法进行算术运算。\n改正：sum=$(( sum + i ))\n或：sum=`expr $sum + $i`\n\n完整正确脚本：\nsum=0\nfor i in 1 2 3 4 5\ndo\n  sum=$(( sum + i ))\ndone\necho $sum",
+    "explanation": "Shell变量赋值等号两侧不能有空格；字符串拼接不能代替算术运算；必须使用$(())或expr进行整数算术运算。",
+    "tags": [
+      "代码纠错",
+      "赋值",
+      "$(())"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2ed",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本：根据输入的分数输出等级（90分及以上优秀，80-89良好，60-79及格，60以下不及格）。",
+    "options": [],
+    "answer": "#!/bin/bash\nread -p \"请输入成绩: \" score\nif [ $score -ge 90 ]; then\n    echo \"优秀\"\nelif [ $score -ge 80 ]; then\n    echo \"良好\"\nelif [ $score -ge 60 ]; then\n    echo \"及格\"\nelse\n    echo \"不及格\"\nfi",
+    "explanation": "使用if-elif-else结构；-ge表示大于等于(greater than or equal)；条件判断要从高到低排列；以fi结束。这是考试最常考的脚本模板。",
+    "tags": [
+      "if-elif",
+      "成绩判断",
+      "-ge"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2ee",
+    "type": "shell_coding",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本：使用for循环计算1到100的累加和，并输出结果。",
+    "options": [],
+    "answer": "#!/bin/bash\nsum=0\nfor i in $(seq 1 100)\ndo\n    sum=$(( sum + i ))\ndone\necho \"1到100的累加和为: $sum\"",
+    "explanation": "$(seq 1 100)生成1到100的序列；$(( sum + i ))整数加法；循环体在do和done之间。结果应为5050。",
+    "tags": [
+      "for循环",
+      "累加",
+      "seq"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f4",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.8",
+    "question": "在Shell条件测试中，[ -d /tmp ] 的含义是？",
+    "options": [
+      "A. /tmp文件存在",
+      "B. /tmp是一个目录",
+      "C. /tmp有执行权限",
+      "D. /tmp是普通文件"
+    ],
+    "answer": "B",
+    "explanation": "-d测试指定路径是否为目录(directory)。[ -d /tmp ]为真说明/tmp是目录。",
+    "tags": [
+      "文件测试",
+      "-d",
+      "目录判断"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f5",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "Shell中 case 语句用什么关键字结束？",
+    "options": [
+      "A. fi",
+      "B. done",
+      "C. end",
+      "D. esac"
+    ],
+    "answer": "D",
+    "explanation": "case以esac结束（case倒写）；if以fi结束（if倒写）；for/while/until以done结束。每个模式分支以;;结尾。",
+    "tags": [
+      "case语句",
+      "esac"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f8",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "【完形填空】补全下面成绩统计脚本中的空白处（____）：\n#!/bin/bash\nsum=0\nmax=0\nmin=____\nfor i in 1 2 3 4 5\ndo\n    read -p \"输入第${i}个成绩: \" score\n    sum=____\n    if [ $score ____ $max ]; then\n        max=$score\n    fi\n    if [ $score ____ $min ]; then\n        min=$score\n    fi\ndone\navg=$(echo \"____; $sum/5\" | bc)\necho \"总分:$sum 平均:$avg 最高:$max 最低:$min\"",
+    "options": [],
+    "answer": "按顺序填入：\n1. min=100（初始化最小值为最大可能值100）\n2. sum=$(( sum + score ))（整数累加）\n3. -gt（大于，用于更新最大值）\n4. -lt（小于，用于更新最小值）\n5. scale=1（bc保留1位小数）\n\n完整关键行：\nmin=100\nsum=$(( sum + score ))\nif [ $score -gt $max ]\nif [ $score -lt $min ]\navg=$(echo \"scale=1; $sum/5\" | bc)",
+    "explanation": "这道题是考试最高频的综合题型，5个空分别考察：变量初始化逻辑、$(())算术、-gt/-lt数值比较、bc的scale参数。每个空都是独立考点。",
+    "tags": [
+      "完形填空",
+      "成绩统计",
+      "综合",
+      "bc",
+      "-gt",
+      "-lt"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f1",
+    "type": "short_answer",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "下面Shell脚本要判断两个数的大小，找出错误并改正：\nread -p '输入a: ' a\nread -p '输入b: ' b\nif [ a > b ]\nthen\n  echo 'a更大'\nfi",
+    "options": [],
+    "answer": "错误：[ a > b ] 中，a和b没有加$符号取值，且>在[]中是重定向符号而非比较符。\n\n改正：\nread -p '输入a: ' a\nread -p '输入b: ' b\nif [ $a -gt $b ]\nthen\n  echo 'a更大'\nfi\n\n说明：变量需要用$a、$b引用；数值比较用-gt(大于)，不能用>。",
+    "explanation": "两个常见错误：1)变量引用必须加$；2)在[]中数值比较必须用-gt/-lt/-ge/-le/-eq/-ne，不能用>/<。",
+    "tags": [
+      "代码纠错",
+      "变量引用",
+      "数值比较"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2f9",
+    "type": "shell_coding",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "【完形填空】补全这个判断奇偶数的脚本：\n#!/bin/bash\nread -p \"输入一个整数: \" n\nif [ $(( ____ )) -____ 0 ]; then\n    echo \"${n}是偶数\"\nelse\n    echo \"${n}是奇数\"\nfi",
+    "options": [],
+    "answer": "按顺序填入：\n1. n % 2（取余运算）\n2. eq（等于0则为偶数）\n\n完整判断行：\nif [ $(( n % 2 )) -eq 0 ]; then\n\n完整脚本：\n#!/bin/bash\nread -p \"输入一个整数: \" n\nif [ $(( n % 2 )) -eq 0 ]; then\n    echo \"${n}是偶数\"\nelse\n    echo \"${n}是奇数\"\nfi",
+    "explanation": "关键点：%是取余运算符；$(( n % 2 ))计算n除以2的余数；余数为0则是偶数用-eq 0判断。$(())内的变量可以不加$符号。",
+    "tags": [
+      "完形填空",
+      "奇偶判断",
+      "取余",
+      "-eq"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2fb",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第1章",
+    "section": "1.3",
+    "question": "简述Linux文件系统的目录结构，并说明 /etc、/home、/var、/tmp、/usr 各目录的主要用途。",
+    "options": [],
+    "answer": "Linux采用树形目录结构，根目录为/。\n\n主要目录用途：\n- /etc：系统配置文件（如/etc/passwd用户信息、/etc/fstab磁盘挂载）\n- /home：普通用户的主目录（如/home/alice是用户alice的家目录）\n- /var：可变数据，如日志文件(/var/log)、邮件等\n- /tmp：临时文件，系统重启后通常会清空\n- /usr：用户程序和数据（/usr/bin放置大多数用户命令）",
+    "explanation": "FHS（文件系统层次标准）规定了Linux目录结构。/etc和/home是考试重点，/etc存配置，/home存用户数据。",
+    "tags": [
+      "目录结构",
+      "FHS",
+      "/etc",
+      "/home"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2da",
+    "type": "choice",
+    "difficulty": "hard",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "一个文件权限为 rw-r--r--，其八进制表示是？",
+    "options": [
+      "A. 755",
+      "B. 644",
+      "C. 600",
+      "D. 664"
+    ],
+    "answer": "B",
+    "explanation": "rw-=6(4+2), r--=4(4+0+0), r--=4。所以是644。",
+    "tags": [
+      "chmod",
+      "权限",
+      "八进制"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e7",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.6",
+    "question": "在vi底行命令模式中，保存文件并退出的命令是？",
+    "options": [
+      "A. :q",
+      "B. :w",
+      "C. :wq",
+      "D. :q!"
+    ],
+    "answer": "C",
+    "explanation": ":w保存不退出；:q退出（未修改）；:wq保存并退出；:q!强制退出不保存；:wq!强制保存并退出。",
+    "tags": [
+      "vi",
+      "保存退出"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2d8",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "chmod 755 file.sh 中，755对应的权限是？",
+    "options": [
+      "A. rwxr-xr-x",
+      "B. rwxrwxrwx",
+      "C. rw-r--r--",
+      "D. rwx------"
+    ],
+    "answer": "A",
+    "explanation": "7=rwx(4+2+1), 5=r-x(4+0+1), 5=r-x。所以755是 rwxr-xr-x，即所有者可读写执行，组和其他人可读执行。",
+    "tags": [
+      "chmod",
+      "权限",
+      "八进制"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e3",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第3章",
+    "section": "3.3",
+    "question": "在vi命令模式下，输入什么命令进入插入模式并在光标前插入？",
+    "options": [
+      "A. a",
+      "B. i",
+      "C. o",
+      "D. s"
+    ],
+    "answer": "B",
+    "explanation": "i=insert在光标前插入；a=append在光标后追加；o在当前行下面新开一行；s删除光标处字符并进入插入模式。",
+    "tags": [
+      "vi",
+      "插入模式",
+      "i命令"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e9",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.5",
+    "question": "在vi命令模式下，5dd 可以删除从当前行开始的5行。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "ndd表示删除n行，5dd删除从光标所在行开始的5行。类似地，5yy复制5行，5p粘贴5次。",
+    "tags": [
+      "vi",
+      "删除",
+      "dd命令"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e2",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "rm -rf / 会递归删除根目录下所有文件，这是非常危险的操作。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "-r递归删除目录，-f强制不提示，对根目录/执行会删除整个系统文件，是极危险操作。现代Linux系统通常有保护机制阻止此操作。",
+    "tags": [
+      "rm",
+      "危险操作"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e5",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.5",
+    "question": "在vi底行命令模式中，将全文所有的'old'替换为'new'的命令是？",
+    "options": [
+      "A. :s/old/new/",
+      "B. :%s/old/new/g",
+      "C. :s/old/new/g",
+      "D. :/old/new/g"
+    ],
+    "answer": "B",
+    "explanation": ":%s/old/new/g 中：%表示全文，s表示substitute替换，/old/new/g中g表示每行所有匹配。:s只替换当前行第一个匹配。",
+    "tags": [
+      "vi",
+      "查找替换"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e8",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.3",
+    "question": "在vi的命令模式下，按下ESC键可以返回到命令模式。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "ESC键是从插入模式或底行模式返回到命令模式。如果已经在命令模式，按ESC无效（或只是取消某些操作）。",
+    "tags": [
+      "vi",
+      "模式切换",
+      "ESC"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2d9",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "chmod u+x,g-w file 的含义是？",
+    "options": [
+      "A. 给所有者加执行权限，给组去掉写权限",
+      "B. 给所有人加执行权限",
+      "C. 给组加执行权限，给所有者去掉写权限",
+      "D. 去掉所有写权限"
+    ],
+    "answer": "A",
+    "explanation": "符号模式中：u=所有者(user)，g=组(group)，+x=增加执行，-w=去掉写。u+x,g-w表示给所有者加执行权限并给组去掉写权限。",
+    "tags": [
+      "chmod",
+      "符号模式",
+      "权限"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e6",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第3章",
+    "section": "3.3",
+    "question": "在vi命令模式下，撤销上一次操作的命令是？",
+    "options": [
+      "A. r",
+      "B. u",
+      "C. U",
+      "D. Ctrl+Z"
+    ],
+    "answer": "B",
+    "explanation": "u(undo)撤销上一次操作；U撤销当前行所有修改；r替换单个字符；Ctrl+Z在vi中会将程序放到后台。",
+    "tags": [
+      "vi",
+      "撤销",
+      "u命令"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2db",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "要让脚本文件 run.sh 对所有人都可执行，正确命令是？",
+    "options": [
+      "A. chmod 777 run.sh",
+      "B. chmod a+x run.sh",
+      "C. chmod +x run.sh",
+      "D. B和C都正确"
+    ],
+    "answer": "D",
+    "explanation": "chmod a+x 和 chmod +x 都是给所有人（a=all=ugo）添加执行权限，效果相同。",
+    "tags": [
+      "chmod",
+      "+x",
+      "执行权限"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2dc",
+    "type": "choice",
+    "difficulty": "hard",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "chmod o-rwx file 的作用是？",
+    "options": [
+      "A. 去掉其他人的所有权限",
+      "B. 去掉所有者的所有权限",
+      "C. 给其他人添加所有权限",
+      "D. 去掉组的所有权限"
+    ],
+    "answer": "A",
+    "explanation": "o=other(其他人)，-rwx=去掉读写执行权限。chmod o-rwx file 表示去掉其他人的所有权限。",
+    "tags": [
+      "chmod",
+      "权限",
+      "other"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2ea",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell中，$(( 3 * 5 + 2 )) 的计算结果是？",
+    "options": [
+      "A. 352",
+      "B. 17",
+      "C. 30",
+      "D. 语法错误"
+    ],
+    "answer": "B",
+    "explanation": "$(())是Shell的算术运算符，先算乘法3*5=15，再加2=17。注意$(())只能处理整数运算。",
+    "tags": [
+      "Shell运算",
+      "$(())"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2eb",
+    "type": "choice",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell中要计算 10/3 保留2位小数，正确的方式是？",
+    "options": [
+      "A. echo $((10/3))",
+      "B. echo \"scale=2; 10/3\" | bc",
+      "C. expr 10/3",
+      "D. let result=10/3"
+    ],
+    "answer": "B",
+    "explanation": "$(())和expr只能处理整数，10/3会得3。bc是任意精度计算器，scale=2表示保留2位小数，echo \"scale=2; 10/3\" | bc 得3.33。",
+    "tags": [
+      "bc",
+      "小数运算",
+      "scale"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e1",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "mkdir -p /a/b/c 中，-p 参数的作用是？",
+    "options": [
+      "A. 设置权限",
+      "B. 递归创建多级目录",
+      "C. 强制创建",
+      "D. 显示创建过程"
+    ],
+    "answer": "B",
+    "explanation": "-p (parents)参数允许递归创建多级目录，如果中间目录不存在也会自动创建，且目录已存在时不会报错。",
+    "tags": [
+      "mkdir",
+      "-p"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2dd",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "chmod 777 与 chmod a+rwx 的效果完全相同。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "777八进制=rwxrwxrwx，a+rwx表示对所有人(all)添加读写执行权限，两者效果完全相同。",
+    "tags": [
+      "chmod",
+      "权限"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2df",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "tar -czvf backup.tar.gz /home 命令中，z参数的作用是？",
+    "options": [
+      "A. 创建归档",
+      "B. 使用gzip压缩",
+      "C. 显示详细信息",
+      "D. 指定文件名"
+    ],
+    "answer": "B",
+    "explanation": "tar参数：c=create创建，z=gzip压缩，v=verbose显示详情，f=file指定文件名。z参数表示使用gzip进行压缩。",
+    "tags": [
+      "tar",
+      "压缩",
+      "参数"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e0",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "解压 backup.tar.gz 到当前目录，正确命令是？",
+    "options": [
+      "A. tar -czvf backup.tar.gz",
+      "B. tar -xzvf backup.tar.gz",
+      "C. tar -tzvf backup.tar.gz",
+      "D. tar -rzvf backup.tar.gz"
+    ],
+    "answer": "B",
+    "explanation": "解压用x(extract)参数：tar -xzvf。c是创建，t是列出内容，r是追加。",
+    "tags": [
+      "tar",
+      "解压"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2de",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "目录必须有执行权限(x)，用户才能进入(cd)该目录。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "目录的x权限表示'进入'权限，没有x权限就无法cd进入该目录，即使有r权限也只能查看目录内容列表。",
+    "tags": [
+      "目录权限",
+      "x权限"
+    ]
+  },
+  {
+    "id": "6a2986d1cdb2f7bb329cf2e4",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.3",
+    "question": "在vi命令模式下，快速跳到第20行的命令是？",
+    "options": [
+      "A. :20",
+      "B. 20G",
+      "C. 20j",
+      "D. A和B都正确"
+    ],
+    "answer": "D",
+    "explanation": ":20（底行命令）和20G（命令模式）都能跳转到第20行。G命令中nG表示跳到第n行。",
+    "tags": [
+      "vi",
+      "跳转",
+      "行号"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff28595",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell变量名区分大小写，name和Name不是同一个变量。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "Shell变量名大小写敏感，name和Name是两个不同的变量。",
+    "tags": [
+      "Shell变量"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff2858e",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.8",
+    "question": "Shell中-ge表示什么比较关系？",
+    "options": [
+      "A. 大于",
+      "B. 大于等于",
+      "C. 小于等于",
+      "D. 等于"
+    ],
+    "answer": "B",
+    "explanation": "-ge表示greater than or equal to，即大于等于。-gt大于，-le小于等于，-lt小于，-eq等于，-ne不等于。",
+    "tags": [
+      "条件测试"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff28594",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "for循环和while循环以什么关键字结束？",
+    "options": [
+      "A. fi",
+      "B. esac",
+      "C. done",
+      "D. end"
+    ],
+    "answer": "C",
+    "explanation": "for和while循环都以done结束。fi结束if，esac结束case。",
+    "tags": [
+      "控制结构"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff28593",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第8章",
+    "section": "8.2.1",
+    "question": "/etc/group文件的作用是",
+    "options": [
+      "A. 保存用户密码",
+      "B. 保存用户组信息",
+      "C. 保存系统配置",
+      "D. 保存开机启动项"
+    ],
+    "answer": "B",
+    "explanation": "/etc/group保存用户组信息，包括组名、GID、组成员等。",
+    "tags": [
+      "用户管理"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff2858f",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "cd ..的作用是",
+    "options": [
+      "A. 进入用户主目录",
+      "B. 返回上级目录",
+      "C. 显示当前目录",
+      "D. 删除当前目录"
+    ],
+    "answer": "B",
+    "explanation": "cd ..返回上级目录。cd ~进入用户主目录。pwd显示当前目录。",
+    "tags": [
+      "cd命令"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff28592",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.3",
+    "question": "在vi中，在当前行下方新开一行并进入输入方式的命令是",
+    "options": [
+      "A. i",
+      "B. a",
+      "C. o",
+      "D. :w"
+    ],
+    "answer": "C",
+    "explanation": "i在光标前插入，a在光标后追加，o在当前行下方新开一行。",
+    "tags": [
+      "vi编辑器"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff28596",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "ln -s命令用于创建符号链接（软链接）。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "ln -s创建符号链接，ln不加参数创建硬链接。",
+    "tags": [
+      "链接"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff2858c",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell变量赋值的正确写法是",
+    "options": [
+      "A. name = Tom",
+      "B. name=Tom",
+      "C. name =Tom",
+      "D. name= Tom"
+    ],
+    "answer": "B",
+    "explanation": "变量赋值等号两边不能有空格，必须写成name=Tom。",
+    "tags": [
+      "Shell变量"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff28591",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.5",
+    "question": "在vi命令方式下，删除当前行的命令是",
+    "options": [
+      "A. yy",
+      "B. p",
+      "C. dd",
+      "D. u"
+    ],
+    "answer": "C",
+    "explanation": "dd删除当前行，ndd删除n行。u是撤销，yy是复制，p是粘贴。",
+    "tags": [
+      "vi编辑器"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff2858b",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell中$?表示什么？",
+    "options": [
+      "A. 脚本文件名",
+      "B. 参数个数",
+      "C. 所有参数",
+      "D. 上一条命令的退出状态"
+    ],
+    "answer": "D",
+    "explanation": "$?返回上一条命令的退出状态，0表示成功，非0表示失败。",
+    "tags": [
+      "位置参数"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff2858d",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "Shell中if语句以什么关键字结束？",
+    "options": [
+      "A. end",
+      "B. done",
+      "C. esac",
+      "D. fi"
+    ],
+    "answer": "D",
+    "explanation": "if语句以fi结束（fi是if倒写）。done结束for/while，esac结束case。",
+    "tags": [
+      "if语句"
+    ]
+  },
+  {
+    "id": "6a297c839fbfddce7ff28590",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "rm -i file 的作用是",
+    "options": [
+      "A. 强制删除文件",
+      "B. 递归删除目录",
+      "C. 删除前提示用户确认",
+      "D. 只删除空文件"
+    ],
+    "answer": "C",
+    "explanation": "-i表示interactive，删除前会提示用户确认。-f是强制删除，-r是递归删除。",
+    "tags": [
+      "rm命令"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28584",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "使用case语句设计菜单。可分别创建study、work、music、picture四个目录。可一次性创建全部目录。可删除上述四个目录。输入其他选项时输出“输入错误”。",
+    "options": [],
+    "answer": "#!/bin/bash\necho \"请选择操作：\"\necho \"1. 创建study目录\"\necho \"2. 创建work目录\"\necho \"3. 创建music目录\"\necho \"4. 创建picture目录\"\necho \"5. 一次性创建全部目录\"\necho \"6. 删除全部目录\"\nread -p \"请输入选项: \" choice\ncase $choice in\n  1)\n    mkdir -p $HOME/study\n    echo \"study目录创建成功\"\n    ;;\n  2)\n    mkdir -p $HOME/work\n    echo \"work目录创建成功\"\n    ;;\n  3)\n    mkdir -p $HOME/music\n    echo \"music目录创建成功\"\n    ;;\n  4)\n    mkdir -p $HOME/picture\n    echo \"picture目录创建成功\"\n    ;;\n  5)\n    mkdir -p $HOME/study $HOME/work $HOME/music $HOME/picture\n    echo \"四个目录全部创建成功\"\n    ;;\n  6)\n    rm -r $HOME/study $HOME/work $HOME/music $HOME/picture 2>/dev/null\n    echo \"四个目录删除完成\"\n    ;;\n  *)\n    echo \"输入错误\"\n    ;;\nesac",
+    "explanation": "case语句适合多分支菜单题，必须以esac结束。每个分支后用;;结束。rm -r用于递归删除目录。2>/dev/null表示把错误信息丢弃。",
+    "tags": [
+      "case语句",
+      "mkdir",
+      "rm"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff2858a",
+    "type": "shell_coding",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本，使用for循环输出乘法口诀表（1到9）。",
+    "options": [],
+    "answer": "#!/bin/bash\nfor ((i=1; i<=9; i++))\ndo\n  for ((j=1; j<=i; j++))\n  do\n    result=$((i * j))\n    echo -n \"${j}x${i}=${result} \"\n  done\n  echo\ndone",
+    "explanation": "双重for循环嵌套。echo -n表示不换行输出，单独echo输出换行。",
+    "tags": [
+      "for循环",
+      "嵌套循环"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28581",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "定义数组scores，存放10个学生成绩。使用循环求最高分、最低分、平均分。统计成绩大于等于85分的优秀人数。输出最高分、最低分、平均分和优秀人数。",
+    "options": [],
+    "answer": "#!/bin/bash\nscores=(78 90 66 88 95 72 84 100 59 91)\nsum=0\nmax=${scores[0]}\nmin=${scores[0]}\nexcellent=0\nfor score in ${scores[@]}\ndo\n  sum=$((sum + score))\n  if [ $score -gt $max ]; then\n    max=$score\n  fi\n  if [ $score -lt $min ]; then\n    min=$score\n  fi\n  if [ $score -ge 85 ]; then\n    excellent=$((excellent + 1))\n  fi\ndone\navg=$((sum / ${#scores[@]}))\necho \"最高分: $max\"\necho \"最低分: $min\"\necho \"平均分: $avg\"\necho \"优秀人数: $excellent\"",
+    "explanation": "数组定义格式：scores=(78 90 66 ...)。${scores[@]}表示数组全部元素，${#scores[@]}表示数组元素个数。比较大小使用-gt、-lt、-ge等数值测试运算符。",
+    "tags": [
+      "Shell数组",
+      "for循环",
+      "成绩统计"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28588",
+    "type": "shell_coding",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本，输入一个数字，使用if判断该数是正数、负数还是零。",
+    "options": [],
+    "answer": "#!/bin/bash\nread -p \"请输入一个数字: \" num\nif [ $num -gt 0 ]; then\n  echo \"$num 是正数\"\nelif [ $num -lt 0 ]; then\n  echo \"$num 是负数\"\nelse\n  echo \"输入的是零\"\nfi",
+    "explanation": "if-elif-else结构基础题。用-gt、-lt和-eq进行数值比较。",
+    "tags": [
+      "if判断"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28587",
+    "type": "shell_coding",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本，使用while循环计算1加到100的总和。",
+    "options": [],
+    "answer": "#!/bin/bash\nsum=0\ni=1\nwhile [ $i -le 100 ]\ndo\n  sum=$((sum + i))\n  i=$((i + 1))\ndone\necho \"1加到100的总和为: $sum\"",
+    "explanation": "while循环基础题。条件为[ $i -le 100 ]，每次循环累加i并自增。",
+    "tags": [
+      "while循环",
+      "算术运算"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28583",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "在用户主目录下创建logs目录。使用for循环创建user1.log到user10.log共10个文件。每个文件中写入一行说明文字。将所有日志文件权限设置为所有用户可读可写。最后用ls -l显示创建结果。",
+    "options": [],
+    "answer": "#!/bin/bash\nmkdir -p $HOME/logs\nfor ((i=1; i<=10; i++))\ndo\n  filename=\"$HOME/logs/user${i}.log\"\n  echo \"This is user${i} log file\" > $filename\n  chmod 666 $filename\ndone\necho \"日志文件创建完成，结果如下：\"\nls -l $HOME/logs/user*.log",
+    "explanation": "$HOME表示当前用户主目录。mkdir -p表示目录不存在则创建。chmod 666表示所有用户可读写。重定向符>用于把echo输出写入文件。",
+    "tags": [
+      "for循环",
+      "mkdir",
+      "chmod",
+      "文件操作"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28589",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "编写Shell脚本，从finput.txt文件中读取每一行，统计文件的总行数，并输出每行的内容和行号。",
+    "options": [],
+    "answer": "#!/bin/bash\ncount=0\nwhile read line\ndo\n  count=$((count + 1))\n  echo \"第${count}行: $line\"\ndone < input.txt\necho \"总行数: $count\"",
+    "explanation": "while read line从stdin读取每一行，< input.txt把文件重定向为输入。每读一行计数器加1。",
+    "tags": [
+      "while循环",
+      "文件读取"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28585",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "使用find和wc统计用户主目录下的普通文件数量、目录数量、可执行文件数量、.log文件和.txt文件数量。要求只统计主目录下一层内容，不递归统计子目录内容。",
+    "options": [],
+    "answer": "#!/bin/bash\ndir=$HOME\necho \"统计目录: $dir\"\nfile_count=$(find $dir -maxdepth 1 -mindepth 1 -type f | wc -l)\ndir_count=$(find $dir -maxdepth 1 -mindepth 1 -type d | wc -l)\nexec_count=$(find $dir -maxdepth 1 -mindepth 1 -type f -executable | wc -l)\nlog_count=$(find $dir -maxdepth 1 -mindepth 1 -type f -name \"*.log\" | wc -l)\ntxt_count=$(find $dir -maxdepth 1 -mindepth 1 -type f -name \"*.txt\" | wc -l)\necho \"普通文件数量: $file_count\"\necho \"目录数量: $dir_count\"\necho \"可执行文件数量: $exec_count\"\necho \".log文件数量: $log_count\"\necho \".txt文件数量: $txt_count\"",
+    "explanation": "find $dir -maxdepth 1表示只查找一层。-mindepth 1表示不把$HOME自身统计进去。-type f表示普通文件，-type d表示目录。find命令每找到一个结果输出一行，配合wc -l即可统计数量。",
+    "tags": [
+      "find命令",
+      "wc命令"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28586",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "输入10个成绩，统计总分、最高分、最低分、平均分和优秀人数（>=85分）。使用read命令读取输入，结合数组和for循环实现。",
+    "options": [],
+    "answer": "#!/bin/bash\nsum=0\nexcellent=0\nfor ((i=0; i<10; i++))\ndo\n  read -p \"请输入第 $((i+1)) 个学生成绩: \" scores[$i]\ndone\nmax=${scores[0]}\nmin=${scores[0]}\nfor score in ${scores[@]}\ndo\n  sum=$((sum + score))\n  if [ $score -gt $max ]; then\n    max=$score\n  fi\n  if [ $score -lt $min ]; then\n    min=$score\n  fi\n  if [ $score -ge 85 ]; then\n    excellent=$((excellent + 1))\n  fi\ndone\navg=$((sum / 10))\necho \"总分: $sum\"\necho \"最高分: $max\"\necho \"最低分: $min\"\necho \"平均分: $avg\"\necho \"优秀人数: $excellent\"",
+    "explanation": "结合read输入和数组存储，先输入再统计。这是最常考的编程题模板。",
+    "tags": [
+      "read命令",
+      "Shell数组",
+      "成绩统计"
+    ]
+  },
+  {
+    "id": "6a297c4e9fbfddce7ff28582",
+    "type": "shell_coding",
+    "difficulty": "hard",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "从键盘输入一个正整数num。如果num小于等于1，输出不是素数。判断num是否只能被1和它本身整除。根据判断结果输出“是素数”或“不是素数”。",
+    "options": [],
+    "answer": "#!/bin/bash\nread -p \"请输入一个正整数: \" num\nif [ $num -le 1 ]; then\n  echo \"$num 不是素数\"\n  exit 0\nfi\nflag=1\nfor ((i=2; i<num; i++))\ndo\n  if [ $((num % i)) -eq 0 ]; then\n    flag=0\n    break\n  fi\ndone\nif [ $flag -eq 1 ]; then\n  echo \"$num 是素数\"\nelse\n  echo \"$num 不是素数\"\nfi",
+    "explanation": "read -p用于输入并给出提示。num % i表示求余数，如果余数为0，说明能被其他数整除。break用于提前结束循环。flag变量常用于保存判断结果。",
+    "tags": [
+      "if判断",
+      "for循环",
+      "素数"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff28571",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第8章",
+    "section": "8.2",
+    "question": "简述Linux用户账号管理中/etc/passwd、/etc/shadow和/etc/group的作用。",
+    "options": [],
+    "answer": "/etc/passwd：保存用户账号基本信息，如用户名、UID、GID、主目录、登录Shell等。\n/etc/shadow：保存用户口令相关信息，一般只有管理员可读，安全性更高。\n/etc/group：保存用户组信息。\n常见账号管理命令有useradd、passwd、userdel、groupadd等。",
+    "explanation": "第八章8.2.1和8.2.2重点。",
+    "tags": [
+      "用户管理"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff2856e",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "简述绝对路径和相对路径的区别，并各举一例。",
+    "options": [],
+    "answer": "绝对路径：从根目录/开始写出的完整路径，不依赖当前工作目录。例：/home/ming/test.txt。\n相对路径：相对于当前工作目录来描述文件位置。例：docs/a.txt、../test.txt。\npwd命令可以显示当前工作目录，cd命令用于切换目录。",
+    "explanation": "结合第二章目录结构和路径名考点。",
+    "tags": [
+      "路径",
+      "目录结构"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff28575",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.4.1",
+    "question": "简述more和less命令的区别。",
+    "options": [],
+    "answer": "more和less都用于分页显示文本文件内容。more主要按页向后浏览；less功能更强，可以向前、向后翻页，退出less程序按q键。",
+    "explanation": "文件显示命令对比。",
+    "tags": [
+      "more命令",
+      "less命令"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff28570",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "简述Shell变量定义、引用和位置参数的基本用法。",
+    "options": [],
+    "answer": "用户自定义变量赋值格式：变量名=字符串，等号两边不能有空格。\n引用变量时使用$变量名或${变量名}，例如echo $name。\n如果变量值中含有空格，应使用双引号，如msg=\"hello linux\"。\n$0表示脚本名，$1、$2表示第1、第2个位置参数，$#表示参数个数，$?表示上一条命令执行状态。",
+    "explanation": "第四章4.6变量、数组、位置参数是Shell编程题基础。",
+    "tags": [
+      "Shell变量",
+      "位置参数"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff28573",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "简述硬链接和符号链接的区别。",
+    "options": [],
+    "answer": "硬链接是给同一个文件增加一个目录项，不产生新的文件内容；通常不能对目录创建硬链接，也不能跨文件系统。\n符号链接又称软链接，是一个新的特殊文件，保存目标文件路径，可以链接目录，也可以跨文件系统。\n硬链接用ln原文件 链接名，软链接用ln -s原文件 链接名。",
+    "explanation": "链接知识点常考判断和简答。",
+    "tags": [
+      "链接"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff2856f",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.1",
+    "question": "简述vi编辑器的三种工作方式及常见切换方法。",
+    "options": [],
+    "answer": "命令方式：进入vi后的默认模式，可移动光标、删除、复制、粘贴等。\n输入方式：用于输入正文，可用i、a、o等命令进入。\n末行方式（ex命令方式）：用于保存、退出、查找替换等，可在命令方式下输入冒号:进入。\n从输入方式返回命令方式按Esc；保存退出可用:wq，强制退出可用:q!。",
+    "explanation": "第三章大题重点，必须会写三种工作方式。",
+    "tags": [
+      "vi编辑器",
+      "工作方式"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff2856d",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第1章",
+    "section": "1.3",
+    "question": "简述Linux系统的主要特点。",
+    "options": [],
+    "answer": "Linux是类UNIX操作系统，具有开放源代码、稳定性较好、可移植性较强等特点。支持多用户、多任务，适合网络服务和服务器环境。具有良好的文件系统和权限管理机制。命令行功能强大，能通过Shell脚本完成自动化操作。",
+    "explanation": "答题时至少写出“开放源代码、多用户多任务、稳定、安全、网络功能强、Shell脚本”中的3点。",
+    "tags": [
+      "Linux特点"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff28572",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "简述chmod 755 file.sh的含义。",
+    "options": [],
+    "answer": "权限数字中r=4，w=2，x=1。755表示文件主权限为7，即读写执行(rwx)；同组用户权限为5，即读和执行(r-x)；其他用户权限为5，即读和执行(r-x)。对应的权限字符为rwxr-xr-x。",
+    "explanation": "chmod数字法是高频考点，必须会计算。",
+    "tags": [
+      "chmod命令"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff28576",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "简述位置参数$0、$1、$#、$?的含义。",
+    "options": [],
+    "answer": "$0表示脚本名；$1表示第一个命令行参数；$#表示参数个数；$?表示上一条命令的执行状态，通常0表示执行成功，非0表示失败。",
+    "explanation": "位置参数是高频考点。",
+    "tags": [
+      "位置参数"
+    ]
+  },
+  {
+    "id": "6a297be39fbfddce7ff28574",
+    "type": "short_answer",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.1.3",
+    "question": "简述Shell脚本建立和执行的步骤。",
+    "options": [],
+    "answer": "先创建脚本文件，如vi test.sh；第一行写#!/bin/bash；编写脚本命令；用chmod +x test.sh赋予执行权限；最后用./test.sh或bash test.sh执行。",
+    "explanation": "第四章4.1.3基础知识。",
+    "tags": [
+      "Shell脚本"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28562",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第8章",
+    "section": "8.2.2",
+    "question": "useradd命令用于删除用户账号。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "useradd用于创建用户，userdel用于删除用户。",
+    "tags": [
+      "用户管理"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28569",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "chmod 666 file 表示所有用户都有读写执行权限。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "6=4+2=读写，没有执行权限。666表示所有用户可读可写，权限为rw-rw-rw-。",
+    "tags": [
+      "chmod命令"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2856b",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第8章",
+    "section": "8.2.1",
+    "question": "/etc/shadow文件保存的是用户的加密口令信息，一般只有管理员可读。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "/etc/shadow存储加密密码，权限更严格，提高安全性。",
+    "tags": [
+      "用户管理"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2856a",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.5.4",
+    "question": "在Shell脚本中，以#开头的行是注释，不会被执行。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "#开头的正文行是注释，但第一行的#!/bin/bash是特殊的shebang。",
+    "tags": [
+      "注释"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28561",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "case语句通常以case开始，以esac结束。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "esac是case倒写，表示case语句结束。",
+    "tags": [
+      "case语句"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28567",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "绝对路径从根目录/开始，相对路径从当前工作目录开始。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "绝对路径如/home/ming/test.txt，相对路径如./test.txt或../test.txt。",
+    "tags": [
+      "路径"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2856c",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "if语句中的方括号[ ]两边必须有空格。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "if [ $a -gt $b ]; then 中，[和]两边都必须有空格，否则会报错。",
+    "tags": [
+      "条件测试"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2855a",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell变量赋值时，等号两边可以随意加空格。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "变量赋值必须写成name=value，等号两边不能有空格。",
+    "tags": [
+      "Shell变量"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28564",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell数组的下标从1开始。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "Shell数组下标从0开始，${arr[0]}是第一个元素。",
+    "tags": [
+      "Shell数组"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2855b",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.4.1",
+    "question": "less命令可以向前、向后浏览文件，退出时按q键。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "less比more灵活，可以上下翻页，q退出。",
+    "tags": [
+      "less命令"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2855f",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "在Shell中，单引号中的变量名不会被解释为变量值。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "单引号会保留字符原样；双引号中变量会被替换。",
+    "tags": [
+      "引号"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2855d",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "find命令不设置任何参数时，会在当前目录查找并显示子目录和文件。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "find默认从当前目录开始遍历并输出结果。",
+    "tags": [
+      "find命令"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28559",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第1章",
+    "section": "1.3",
+    "question": "Linux文件名区分大小写，file和File是两个不同的文件名。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "Linux系统通常区分大小写，这是Linux的重要特点之一。",
+    "tags": [
+      "Linux特点"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28560",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第4章",
+    "section": "4.5.4",
+    "question": "管道符|可以把前一个命令的输出作为后一个命令的输入。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "例如ls | wc -l可统计ls输出行数。",
+    "tags": [
+      "管道"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28565",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第3章",
+    "section": "3.1",
+    "question": "进入vi后默认是输入方式。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "进入vi后默认是命令方式，需要按i等命令才能进入输入方式。",
+    "tags": [
+      "vi编辑器"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2855c",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "rm -r命令可以递归删除目录及其下的文件。",
+    "options": [],
+    "answer": "正确",
+    "explanation": "-r表示recursive，递归处理目录。",
+    "tags": [
+      "rm命令"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28568",
+    "type": "judge",
+    "difficulty": "easy",
+    "chapter": "第4章",
+    "section": "4.1.3",
+    "question": "Shell脚本执行前必须用chmod +x赋予执行权限，否则无法运行。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "也可以用bash script.sh直接运行，不需要执行权限。但用./script.sh方式则需要执行权限。",
+    "tags": [
+      "Shell脚本"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff2855e",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "硬链接可以跨不同文件系统，也可以给目录创建硬链接。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "硬链接通常不能跨文件系统，也一般不能对目录创建硬链接。",
+    "tags": [
+      "链接"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28566",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.8",
+    "question": "在Shell中，数值比较可以直接使用>和<符号。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "数值比较使用-eq、-ne、-gt、-lt、-ge、-le，不能直接用>或<（会被解释为重定向）。",
+    "tags": [
+      "条件测试"
+    ]
+  },
+  {
+    "id": "6a297b849fbfddce7ff28563",
+    "type": "judge",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "rmdir命令可以删除非空目录。",
+    "options": [],
+    "answer": "错误",
+    "explanation": "rmdir只能删除空目录，要删除非空目录需要用rm -r。",
+    "tags": [
+      "rmdir命令"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff2854b",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第4章",
+    "section": "4.1.3",
+    "question": "Shell脚本第一行常写作",
+    "options": [
+      "A. #/bin/bash",
+      "B. #!/bin/bash",
+      "C. //bin/bash",
+      "D. bash!"
+    ],
+    "answer": "B",
+    "explanation": "#!/bin/bash称为shebang，用于指定脚本的解释器。",
+    "tags": [
+      "Shell脚本",
+      "shebang"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28547",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第3章",
+    "section": "3.2",
+    "question": "在vi中保存文件并退出的命令是",
+    "options": [
+      "A. :q!",
+      "B. :wq",
+      "C. :w",
+      "D. dd"
+    ],
+    "answer": "B",
+    "explanation": ":wq保存并退出。:w只保存，:q!强制退出不保存。",
+    "tags": [
+      "vi编辑器"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff2854e",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell中定义数组scores=(80 90 100)，获取数组所有元素的写法是",
+    "options": [
+      "A. $scores",
+      "B. ${scores[*]}",
+      "C. scores[@]",
+      "D. ${scores}"
+    ],
+    "answer": "B",
+    "explanation": "${scores[@]}或${scores[*]}获取数组全部元素。${#scores[@]}获取数组长度。",
+    "tags": [
+      "Shell数组"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28550",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.9",
+    "question": "Shell中case语句以什么关键字结束？",
+    "options": [
+      "A. end",
+      "B. done",
+      "C. esac",
+      "D. fi"
+    ],
+    "answer": "C",
+    "explanation": "case语句以esac结束（esac是case倒写）。fi结束if语句，done结束for/while循环。",
+    "tags": [
+      "case语句"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff2854a",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.6",
+    "question": "在vi中，全文替换old为new的命令是",
+    "options": [
+      "A. /old",
+      "B. :s/old/new/",
+      "C. :%s/old/new/g",
+      "D. :q!"
+    ],
+    "answer": "C",
+    "explanation": ":%s/old/new/g表示全文(%)替换(s)，每行所有匹配(g)都替换。",
+    "tags": [
+      "vi编辑器",
+      "查找替换"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28551",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.5.4",
+    "question": "管道符|的作用是",
+    "options": [
+      "A. 将命令放到后台执行",
+      "B. 将前一个命令的输出作为后一个命令的输入",
+      "C. 将输出重定向到文件",
+      "D. 顺序执行多个命令"
+    ],
+    "answer": "B",
+    "explanation": "管道|把前一个命令的标准输出作为后一个命令的标准输入。",
+    "tags": [
+      "管道",
+      "特殊字符"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28554",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第8章",
+    "section": "8.2.2",
+    "question": "以下哪个命令用于创建新用户账号？",
+    "options": [
+      "A. userdel",
+      "B. passwd",
+      "C. useradd",
+      "D. groupadd"
+    ],
+    "answer": "C",
+    "explanation": "useradd用于创建用户，userdel用于删除用户，passwd用于设置密码。",
+    "tags": [
+      "用户管理"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28546",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第3章",
+    "section": "3.1",
+    "question": "在vi中，从命令方式进入输入方式，可使用的命令是",
+    "options": [
+      "A. :wq",
+      "B. i",
+      "C. dd",
+      "D. yy"
+    ],
+    "answer": "B",
+    "explanation": "i表示在当前光标前插入文本，进入输入方式。dd是删除行，yy是复制行。",
+    "tags": [
+      "vi编辑器"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28552",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.5.1",
+    "question": "Shell通配符?匹配的是",
+    "options": [
+      "A. 任意多个字符",
+      "B. 任意一个字符",
+      "C. 零个或多个字符",
+      "D. 不匹配任何字符"
+    ],
+    "answer": "B",
+    "explanation": "?匹配任意一个字符，*匹配任意多个字符。",
+    "tags": [
+      "通配符"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28549",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.1",
+    "question": "vi编辑器默认进入的工作方式是",
+    "options": [
+      "A. 输入方式",
+      "B. 命令方式",
+      "C. ex命令方式",
+      "D. 编辑方式"
+    ],
+    "answer": "B",
+    "explanation": "进入vi后默认是命令方式，可移动光标、删除、复制等操作。",
+    "tags": [
+      "vi编辑器",
+      "工作方式"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff2854d",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "在Shell中，$0表示",
+    "options": [
+      "A. 第一个参数",
+      "B. 参数个数",
+      "C. 脚本文件名",
+      "D. 上一条命令的退出状态"
+    ],
+    "answer": "C",
+    "explanation": "$0表示脚本文件名，$1表示第一个参数。",
+    "tags": [
+      "位置参数"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28553",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第8章",
+    "section": "8.2.1",
+    "question": "Linux用户账号基本信息通常保存在",
+    "options": [
+      "A. /etc/passwd",
+      "B. /etc/fstab",
+      "C. /etc/profile",
+      "D. /bin/passwd"
+    ],
+    "answer": "A",
+    "explanation": "/etc/passwd保存用户账号基本信息，/etc/shadow保存加密口令信息。",
+    "tags": [
+      "用户管理"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff2854c",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第4章",
+    "section": "4.6",
+    "question": "Shell脚本中$#表示",
+    "options": [
+      "A. 脚本名称",
+      "B. 第一个位置参数",
+      "C. 命令行参数个数",
+      "D. 上一条命令退出状态"
+    ],
+    "answer": "C",
+    "explanation": "$#表示位置参数个数；$0是脚本名，$1是第一个参数，$?是退出状态。",
+    "tags": [
+      "位置参数"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff2854f",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第4章",
+    "section": "4.8",
+    "question": "Shell中进行整数算术运算，以下写法正确的是",
+    "options": [
+      "A. result=a+b",
+      "B. result=$((a+b))",
+      "C. result=a*b",
+      "D. result=[a+b]"
+    ],
+    "answer": "B",
+    "explanation": "Shell中算术运算使用$((表达式))格式。",
+    "tags": [
+      "算术运算"
+    ]
+  },
+  {
+    "id": "6a297b389fbfddce7ff28548",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第3章",
+    "section": "3.5",
+    "question": "在vi命令方式下，复制当前行的命令是",
+    "options": [
+      "A. dd",
+      "B. yy",
+      "C. p",
+      "D. u"
+    ],
+    "answer": "B",
+    "explanation": "yy复制当前行，p粘贴，dd删除当前行，u撤销。nyy可以复制n行。",
+    "tags": [
+      "vi编辑器"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28526",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "将压缩文件file.gz解压缩，常用命令是",
+    "options": [
+      "A. gzip -d file.gz",
+      "B. gzip file.gz",
+      "C. wc -l file.gz",
+      "D. chmod 664 file.gz"
+    ],
+    "answer": "A",
+    "explanation": "gzip -d或gunzip可用于解压.gz文件。",
+    "tags": [
+      "gzip命令",
+      "文件压缩"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28527",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.8",
+    "question": "关于gzip命令，以下说法错误的是",
+    "options": [
+      "A. gzip file会压缩file生成file.gz",
+      "B. 压缩后原文件默认消失",
+      "C. gzip -l可以查看压缩文件信息",
+      "D. gzip可以同时压缩多个文件到一个包"
+    ],
+    "answer": "D",
+    "explanation": "gzip每次只压缩单个文件，不能把多个文件合并压缩。",
+    "tags": [
+      "gzip命令"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28528",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.4.1",
+    "question": "touch命令的主要功能是",
+    "options": [
+      "A. 删除文件",
+      "B. 修改文件内容",
+      "C. 修改文件时间标签或创建空文件",
+      "D. 复制文件"
+    ],
+    "answer": "C",
+    "explanation": "touch命令修改文件时间标签为当前时间。如果文件不存在，则创建一个空文件。",
+    "tags": [
+      "touch命令"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28523",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "要删除非空目录dir及其下所有内容，应使用",
+    "options": [
+      "A. rmdir dir",
+      "B. rm dir",
+      "C. rm -r dir",
+      "D. mkdir -p dir"
+    ],
+    "answer": "C",
+    "explanation": "rmdir只能删除空目录。rm -r可以递归删除目录及其所有内容。",
+    "tags": [
+      "rm命令",
+      "目录操作"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28525",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "关于Linux中的链接，以下说法正确的是",
+    "options": [
+      "A. 硬链接可以跨文件系统",
+      "B. 软链接不能链接目录",
+      "C. 硬链接通常不能对目录创建",
+      "D. ln -s创建硬链接"
+    ],
+    "answer": "C",
+    "explanation": "硬链接通常不能跨文件系统，也不能对目录创建。软链接(ln -s)可以链接目录。",
+    "tags": [
+      "链接",
+      "ln命令"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28529",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "find /home -name '*.txt' -type f 的作用是",
+    "options": [
+      "A. 在/home目录下创建.txt文件",
+      "B. 在/home目录下递归查找所有.txt普通文件",
+      "C. 删除/home目录下的.txt文件",
+      "D. 显示/home目录下的.txt文件内容"
+    ],
+    "answer": "B",
+    "explanation": "find命令从指定目录开始递归搜索，-name指定文件名模式，-type f表示只查找普通文件。",
+    "tags": [
+      "find命令"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff2852a",
+    "type": "choice",
+    "difficulty": "hard",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "chmod u+x,g-w,o=r file 的作用是",
+    "options": [
+      "A. 给文件主增加执行权限，同组取消写权限，其他用户设为只读",
+      "B. 给所有用户设置读写执行权限",
+      "C. 删除所有用户的执行权限",
+      "D. 只有文件主可以读写"
+    ],
+    "answer": "A",
+    "explanation": "u+x给文件主加执行权限，g-w取消同组的写权限，o=r其他用户设为只读。",
+    "tags": [
+      "chmod命令",
+      "符号法"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28524",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "显示当前工作目录的绝对路径，应使用什么命令？",
+    "options": [
+      "A. cd",
+      "B. ls",
+      "C. pwd",
+      "D. mkdir"
+    ],
+    "answer": "C",
+    "explanation": "pwd (print working directory) 命令用于显示当前工作目录的绝对路径。",
+    "tags": [
+      "pwd命令"
+    ]
+  },
+  {
+    "id": "6a297af69fbfddce7ff28522",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "chmod 755 file.sh 表示的权限是",
+    "options": [
+      "A. rwxr-xr-x",
+      "B. rwxrwxrwx",
+      "C. rw-r--r--",
+      "D. rwxrw-rw-"
+    ],
+    "answer": "A",
+    "explanation": "7=4+2+1=rwx，5=4+1=r-x。文件主可读写执行，同组和其他用户可读可执行。",
+    "tags": [
+      "chmod命令",
+      "文件权限"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28514",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.4.1",
+    "question": "关于less命令，以下说法正确的是",
+    "options": [
+      "A. 只能向后浏览文件",
+      "B. 可以向前或向后浏览文件",
+      "C. 不能在终端中使用",
+      "D. 与cat命令功能完全相同"
+    ],
+    "answer": "B",
+    "explanation": "less命令允许用户向前或向后浏览文件，比more更灵活。退出按q键。",
+    "tags": [
+      "less命令"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28516",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.4.5",
+    "question": "统计文件test.txt行数的命令是",
+    "options": [
+      "A. wc -l test.txt",
+      "B. wc -w test.txt",
+      "C. wc -c test.txt",
+      "D. head -l test.txt"
+    ],
+    "answer": "A",
+    "explanation": "wc -l统计行数，wc -w统计字数，wc -c统计字节数。",
+    "tags": [
+      "wc命令"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28512",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.4.1",
+    "question": "在Linux中，用于一次显示一屏文本、满屏后暂停并显示百分比提示的命令是",
+    "options": [
+      "A. cat",
+      "B. more",
+      "C. touch",
+      "D. chmod"
+    ],
+    "answer": "B",
+    "explanation": "more命令按屏显示文件内容，底部会出现--More--百分比提示。",
+    "tags": [
+      "文件显示命令",
+      "more"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28518",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "命令 mkdir -p a/b/c 的作用是",
+    "options": [
+      "A. 删除a/b/c目录",
+      "B. 显示a/b/c目录内容",
+      "C. 创建多级目录，父目录不存在时自动创建",
+      "D. 修改目录权限"
+    ],
+    "answer": "C",
+    "explanation": "mkdir -p用于递归创建目录，-p选项表示如果父目录不存在就自动创建。",
+    "tags": [
+      "mkdir命令",
+      "目录操作"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28513",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.4.1",
+    "question": "cat f1 f2 > f3 的作用是",
+    "options": [
+      "A. 将f3的内容复制到f1和f2",
+      "B. 将f1和f2的内容合并后输出到f3",
+      "C. 删除f1和f2",
+      "D. 比较f1和f2的差异"
+    ],
+    "answer": "B",
+    "explanation": "cat命令连接f1和f2文件内容，通过输出重定向符>写入f3中。",
+    "tags": [
+      "cat命令",
+      "输出重定向"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28519",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.5",
+    "question": "chmod 664 file表示",
+    "options": [
+      "A. 所有用户都有执行权限",
+      "B. 文件主和同组用户可读写，其他用户只读",
+      "C. 只有文件主可读写执行",
+      "D. 所有用户只读"
+    ],
+    "answer": "B",
+    "explanation": "6=4+2表示读写(rw-)，4表示只读(r--)，所以664对应rw-rw-r--。",
+    "tags": [
+      "chmod命令",
+      "文件权限"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28517",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第2章",
+    "section": "2.4.5",
+    "question": "wc -w test.txt 的作用是",
+    "options": [
+      "A. 统计文件行数",
+      "B. 统计文件字数",
+      "C. 统计文件字节数",
+      "D. 统计文件字符数"
+    ],
+    "answer": "B",
+    "explanation": "-w表示word，统计文件中的单词数。",
+    "tags": [
+      "wc命令"
+    ]
+  },
+  {
+    "id": "6a297ac59fbfddce7ff28515",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第2章",
+    "section": "2.4.1",
+    "question": "head命令默认显示文件的前几行？",
+    "options": [
+      "A. 5行",
+      "B. 10行",
+      "C. 20行",
+      "D. 全部行"
+    ],
+    "answer": "B",
+    "explanation": "head命令默认显示文件开头10行，可以用-n选项指定行数。",
+    "tags": [
+      "head命令"
+    ]
+  },
+  {
+    "id": "6a297ab09fbfddce7ff28506",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第1章",
+    "section": "1.3",
+    "question": "关于Linux系统特点，下列说法错误的是",
+    "options": [
+      "A. 多用户、多任务",
+      "B. 区分大小写",
+      "C. 具有较强的网络功能",
+      "D. 只能运行在单用户环境中"
+    ],
+    "answer": "D",
+    "explanation": "Linux支持多用户、多任务，D项只能单用户错误。",
+    "tags": [
+      "Linux特点",
+      "基础概念"
+    ]
+  },
+  {
+    "id": "6a297ab09fbfddce7ff28508",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第1章",
+    "section": "1.3",
+    "question": "以下哪个不是Linux的特点？",
+    "options": [
+      "A. 开放源代码",
+      "B. 良好的可移植性",
+      "C. 图形界面是唯一的操作方式",
+      "D. 支持多种硬件平台"
+    ],
+    "answer": "C",
+    "explanation": "Linux既支持图形界面也支持命令行操作。",
+    "tags": [
+      "Linux特点"
+    ]
+  },
+  {
+    "id": "6a297ab09fbfddce7ff28507",
+    "type": "choice",
+    "difficulty": "easy",
+    "chapter": "第1章",
+    "section": "1.3",
+    "question": "Linux操作系统的创始人是",
+    "options": [
+      "A. Richard Stallman",
+      "B. Linus Torvalds",
+      "C. Dennis Ritchie",
+      "D. Ken Thompson"
+    ],
+    "answer": "B",
+    "explanation": "Linus Torvalds于1991年创建了Linux内核。",
+    "tags": [
+      "Linux历史"
+    ]
+  },
+  {
+    "id": "6a297ab09fbfddce7ff28509",
+    "type": "choice",
+    "difficulty": "medium",
+    "chapter": "第1章",
+    "section": "1.3",
+    "question": "Linux属于哪种类型的操作系统？",
+    "options": [
+      "A. 实时操作系统",
+      "B. 类UNIX操作系统",
+      "C. 嵌入式专用系统",
+      "D. 单任务操作系统"
+    ],
+    "answer": "B",
+    "explanation": "Linux是类UNIX操作系统，继承了UNIX的设计理念。",
+    "tags": [
+      "Linux概述"
+    ]
+  }
+]
