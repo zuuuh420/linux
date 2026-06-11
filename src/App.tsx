@@ -946,7 +946,8 @@ function LabView({ backHome }: { backHome: () => void }) {
         </section>
         <aside className="panel lab-side">
           <SectionTitle title="文件树" compact />
-          <pre className="tree-view">{treeCommand(fs, [], pathText(cwd))}</pre>
+          <div className="tree-current">当前目录：{pathText(cwd)}</div>
+          <pre className="tree-view">{fileTreeView(fs, cwd)}</pre>
           <SectionTitle title="环境说明" compact />
           <p className="empty-copy">支持 pwd、ls、cd、mkdir、touch、cat、echo、chmod、rm、cp、mv、stat、tree、bash/sh、./脚本。文件系统在当前页面内变化，刷新后重置。</p>
           <div className="quick-commands">
@@ -1635,6 +1636,24 @@ function treeCommand(fs: FsDir, cwd: string[], target = '.') {
     ]
   }
   return walk(node, target === '.' ? pathText(path) : target, 0).join('\n')
+}
+
+function fileTreeView(fs: FsDir, cwd: string[]) {
+  const currentPath = pathText(cwd)
+  const walk = (item: FsNode, name: string, path: string[], depth: number): string[] => {
+    const absolute = pathText(path)
+    const prefix = absolute === currentPath ? '→ ' : '  '
+    const indent = '  '.repeat(depth)
+    const suffix = item.type === 'dir' ? '/' : ''
+    if (item.type === 'file') return [`${indent}${prefix}${name}${suffix}`]
+    return [
+      `${indent}${prefix}${name}${suffix}`,
+      ...Object.entries(item.children)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .flatMap(([childName, child]) => walk(child, childName, [...path, childName], depth + 1)),
+    ]
+  }
+  return walk(fs, '/', [], 0).join('\n')
 }
 
 function getEditorTarget(fs: FsDir, cwd: string[], command: string): EditorState | null {
