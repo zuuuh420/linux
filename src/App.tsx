@@ -1579,13 +1579,17 @@ function chmodCommand(fs: FsDir, cwd: string[], args: string[]) {
 
 function rmCommand(fs: FsDir, cwd: string[], args: string[]) {
   const recursive = args.includes('-r') || args.includes('-rf')
-  const targets = args.filter((arg) => arg !== 'rm' && arg !== '-r' && arg !== '-rf')
+  const force = args.includes('-f') || args.includes('-rf')
+  const targets = args.filter((arg) => arg !== 'rm' && arg !== '-r' && arg !== '-f' && arg !== '-rf')
   if (targets.length === 0) throw new Error('rm: missing operand')
   targets.forEach((target) => {
     const path = resolvePath(cwd, target)
     const parent = getNode(fs, path.slice(0, -1))
     const name = path.at(-1)
-    if (!name || !parent || parent.type !== 'dir' || !parent.children[name]) throw new Error(`rm: cannot remove '${target}': No such file or directory`)
+    if (!name || !parent || parent.type !== 'dir' || !parent.children[name]) {
+      if (force) return
+      throw new Error(`rm: cannot remove '${target}': No such file or directory`)
+    }
     if (parent.children[name].type === 'dir' && !recursive) throw new Error(`rm: cannot remove '${target}': Is a directory`)
     delete parent.children[name]
   })
@@ -1763,15 +1767,67 @@ function runScript(fs: FsDir, cwd: string[], source: string, scriptArgs: string[
     env[String(index + 1)] = value
   })
   env['#'] = String(scriptArgs.length)
-  const lines = source
-    .replace(/\r/g, '')
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#!') && !line.startsWith('#'))
+  const lines = normalizeScriptLines(source)
   const output: string[] = []
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index]
-    const forMatch = line.match(/^for\s+(\w+)\s+in\s+(.+)$/)
+    const cForMatch = line.match(/^for\s*\(\(\s*(.+?)\s*;\s*(.+?)\s*;\s*(.+?)\s*\)\)\s*(?:do)?$/)
+    if (cForMatch) {
+      const body: string[] = []
+      index += 1
+      if (lines[index] === 'do') index += 1
+      while (index < lines.length && lines[index] !== 'done') {
+        body.push(lines[index])
+        index += 1
+      }
+      runArithmeticStatement(cForMatch[1], env)
+      let guard = 0
+      while (evaluateCondition(cForMatch[2], env)) {
+        body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
+        runArithmeticStatement(cForMatch[3], env)
+        guard += 1
+        if (guard > 10000) throw new Error('bash: loop exceeded lab limit')
+      }
+      continue
+    }
+    const whileMatch = line.match(/^while\s+(.+?)(?:\s+do)?$/)
+    if (whileMatch) {
+      const body: string[] = []
+      index += 1
+      if (lines[index] === 'do') index += 1
+      while (index < lines.length && lines[index] !== 'done') {
+        body.push(lines[index])
+        index += 1
+      }
+      let guard = 0
+      while (evaluateShellCondition(whileMatch[1], env)) {
+        body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
+        guard += 1
+        if (guard > 10000) throw new Error('bash: loop exceeded lab limit')
+      }
+      continue
+    }
+    const ifMatch = line.match(/^if\s+(.+?)(?:\s+then)?$/)
+    if (ifMatch) {
+      const thenBody: string[] = []
+      const elseBody: string[] = []
+      let currentBody = thenBody
+      index += 1
+      if (lines[index] === 'then') index += 1
+      while (index < lines.length && lines[index] !== 'fi') {
+        if (lines[index] === 'else') {
+          currentBody = elseBody
+          index += 1
+          continue
+        }
+        currentBody.push(lines[index])
+        index += 1
+      }
+      const chosenBody = evaluateShellCondition(ifMatch[1], env) ? thenBody : elseBody
+      chosenBody.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
+      continue
+    }
+    const forMatch = line.match(/^for\s+(\w+)\s+in\s+(.+?)(?:\s+do)?$/)
     if (forMatch) {
       const body: string[] = []
       index += 1
@@ -1781,7 +1837,7 @@ function runScript(fs: FsDir, cwd: string[], source: string, scriptArgs: string[
         index += 1
       }
       const [, variable, valuesText] = forMatch
-      const values = tokenize(expandShell(valuesText, env))
+      const values = expandForValues(valuesText, env)
       values.forEach((value) => {
         env[variable] = value
         body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
@@ -1793,18 +1849,41 @@ function runScript(fs: FsDir, cwd: string[], source: string, scriptArgs: string[
   return output.join('\n')
 }
 
+function normalizeScriptLines(source: string) {
+  return source
+    .replace(/\r/g, '')
+    .split('\n')
+    .flatMap((rawLine) => {
+      const withoutComment = rawLine.replace(/\s+#.*$/, '').trim()
+      if (!withoutComment || withoutComment.startsWith('#!') || withoutComment.startsWith('#')) return []
+      const normalized = withoutComment
+        .replace(/;\s*do\s*$/, '\ndo')
+        .replace(/;\s*then\s*$/, '\nthen')
+        .replace(/^\s*do\s*$/, 'do')
+        .replace(/^\s*then\s*$/, 'then')
+      return normalized
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+    })
+}
+
 function runScriptLine(fs: FsDir, cwd: string[], line: string, env: Record<string, string>, output: string[]) {
   const assignment = line.match(/^([A-Za-z_]\w*)=(.*)$/)
   if (assignment && !line.startsWith('echo ')) {
-    env[assignment[1]] = stripQuotes(expandShell(evaluateArithmetic(assignment[2], env), env))
+    env[assignment[1]] = stripQuotes(expandShell(evaluateArithmetic(expandCommandSubstitution(assignment[2], env), env), env))
+    return
+  }
+  if (/^\(\(.+\)\)$/.test(line) || line.startsWith('let ')) {
+    runArithmeticStatement(line.replace(/^let\s+/, '').replace(/^\(\(|\)\)$/g, ''), env)
     return
   }
   if (line.startsWith('echo ')) {
-    output.push(echoCommand(fs, cwd, tokenize(expandShell(evaluateArithmetic(line, env), env))))
+    output.push(echoCommand(fs, cwd, tokenize(expandShell(evaluateArithmetic(expandCommandSubstitution(line, env), env), env))))
     return
   }
   if (line.startsWith('cat ') || line.startsWith('pwd') || line.startsWith('ls ')) {
-    const result = runCommand(fs, cwd, expandShell(line, env)).lines.map((item) => item.text).join('\n')
+    const result = runCommand(fs, cwd, expandShell(expandCommandSubstitution(line, env), env)).lines.map((item) => item.text).join('\n')
     if (result) output.push(result)
     return
   }
@@ -1814,10 +1893,41 @@ function runScriptLine(fs: FsDir, cwd: string[], line: string, env: Record<strin
   output.push(`[lab] skipped unsupported script line: ${line}`)
 }
 
-function expandShell(text: string, env: Record<string, string>) {
+function expandForValues(valuesText: string, env: Record<string, string>) {
+  const expanded = expandShell(expandCommandSubstitution(valuesText, env), env).trim()
+  const braceMatch = expanded.match(/^\{(-?\d+)\.\.(-?\d+)(?:\.\.(-?\d+))?\}$/)
+  if (braceMatch) return numberRange(Number(braceMatch[1]), Number(braceMatch[2]), braceMatch[3] ? Number(braceMatch[3]) : undefined).map(String)
+  return tokenize(expanded)
+}
+
+function expandCommandSubstitution(text: string, env: Record<string, string>) {
   return text
-    .replace(/\$\{([^}]+)\}/g, (_, name: string) => env[name] ?? '')
-    .replace(/\$(\w+|[#?])/g, (_, name: string) => env[name] ?? '')
+    .replace(/\$\(seq\s+([^)]+)\)/g, (_, argsText: string) => seqCommand(tokenize(expandShell(argsText, env))).join(' '))
+    .replace(/`seq\s+([^`]+)`/g, (_, argsText: string) => seqCommand(tokenize(expandShell(argsText, env))).join(' '))
+}
+
+function seqCommand(args: string[]) {
+  const numbers = args.map(Number).filter((value) => Number.isFinite(value))
+  if (numbers.length === 1) return numberRange(1, numbers[0])
+  if (numbers.length === 2) return numberRange(numbers[0], numbers[1])
+  if (numbers.length >= 3) return numberRange(numbers[0], numbers[2], numbers[1])
+  return []
+}
+
+function numberRange(start: number, end: number, step?: number) {
+  const actualStep = step ?? (start <= end ? 1 : -1)
+  if (actualStep === 0) return []
+  const result: number[] = []
+  if (actualStep > 0) {
+    for (let value = start; value <= end; value += actualStep) result.push(value)
+  } else {
+    for (let value = start; value >= end; value += actualStep) result.push(value)
+  }
+  return result
+}
+
+function expandShell(text: string, env: Record<string, string>) {
+  return expandVariablesOutsideSingleQuotes(text, env)
 }
 
 function expandRuntimeVariables(text: string) {
@@ -1828,19 +1938,137 @@ function expandRuntimeVariables(text: string) {
     PATH: '/usr/local/bin:/usr/bin:/bin',
     PWD: '/home/student',
   }
-  return text.replace(/\$([A-Za-z_]\w*)/g, (_, name: string) => env[name] ?? '')
+  return expandVariablesOutsideSingleQuotes(text, env)
+}
+
+function expandVariablesOutsideSingleQuotes(text: string, env: Record<string, string>) {
+  let result = ''
+  let inSingleQuote = false
+  let inDoubleQuote = false
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index]
+    if (char === '\\' && text[index + 1] === '$') {
+      result += '$'
+      index += 1
+      continue
+    }
+    if (char === "'" && !inDoubleQuote) {
+      inSingleQuote = !inSingleQuote
+      result += char
+      continue
+    }
+    if (char === '"' && !inSingleQuote) {
+      inDoubleQuote = !inDoubleQuote
+      result += char
+      continue
+    }
+    if (char === '$' && !inSingleQuote) {
+      if (text[index + 1] === '{') {
+        const end = text.indexOf('}', index + 2)
+        if (end !== -1) {
+          const name = text.slice(index + 2, end)
+          result += env[name] ?? ''
+          index = end
+          continue
+        }
+      }
+      const match = text.slice(index + 1).match(/^([A-Za-z_]\w*)/)
+      if (match) {
+        result += env[match[1]] ?? ''
+        index += match[1].length
+        continue
+      }
+      if (text[index + 1] === '#' || text[index + 1] === '?') {
+        result += env[text[index + 1]] ?? ''
+        index += 1
+        continue
+      }
+    }
+    result += char
+  }
+  return result
 }
 
 function evaluateArithmetic(text: string, env: Record<string, string>) {
   return text.replace(/\$\(\(\s*([^)]+?)\s*\)\)/g, (_, expr: string) => {
-    const expanded = expr.replace(/[A-Za-z_]\w*/g, (name) => env[name] ?? '0')
-    if (!/^[\d+\-*/% ().]+$/.test(expanded)) return '0'
-    try {
-      return String(Function(`"use strict"; return (${expanded})`)())
-    } catch {
-      return '0'
-    }
+    return String(evaluateArithmeticExpression(expr, env))
   })
+}
+
+function runArithmeticStatement(statement: string, env: Record<string, string>) {
+  const trimmed = statement.trim()
+  const increment = trimmed.match(/^([A-Za-z_]\w*)(\+\+|--)$/)
+  if (increment) {
+    const current = Number(env[increment[1]] || 0)
+    env[increment[1]] = String(current + (increment[2] === '++' ? 1 : -1))
+    return
+  }
+  const assignment = trimmed.match(/^([A-Za-z_]\w*)\s*([+\-*/%]?=)\s*(.+)$/)
+  if (!assignment) return
+  const [, name, operator, expr] = assignment
+  const current = Number(env[name] || 0)
+  const value = evaluateArithmeticExpression(expr, env)
+  if (operator === '=') env[name] = String(value)
+  if (operator === '+=') env[name] = String(current + value)
+  if (operator === '-=') env[name] = String(current - value)
+  if (operator === '*=') env[name] = String(current * value)
+  if (operator === '/=') env[name] = String(Math.trunc(current / value))
+  if (operator === '%=') env[name] = String(current % value)
+}
+
+function evaluateCondition(condition: string, env: Record<string, string>) {
+  const expanded = expandArithmeticVariables(condition, env)
+  if (!/^[\d+\-*/% ().<>=!&|]+$/.test(expanded)) return false
+  try {
+    return Boolean(Function(`"use strict"; return (${expanded})`)())
+  } catch {
+    return false
+  }
+}
+
+function evaluateShellCondition(condition: string, env: Record<string, string>) {
+  const trimmed = condition.trim()
+  const arithmetic = trimmed.match(/^\(\((.+)\)\)$/)
+  if (arithmetic) return evaluateCondition(arithmetic[1], env)
+  const bracket = trimmed.match(/^\[\s*(.+)\s*\]$/) || trimmed.match(/^\[\[\s*(.+)\s*\]\]$/)
+  const expression = bracket ? bracket[1] : trimmed
+  const parts = tokenize(expandShell(evaluateArithmetic(expression, env), env)).map(stripQuotes)
+  if (parts.length === 1) return parts[0].length > 0
+  if (parts.length === 2) {
+    if (parts[0] === '-n') return parts[1].length > 0
+    if (parts[0] === '-z') return parts[1].length === 0
+  }
+  if (parts.length >= 3) {
+    const [left, operator, right] = parts
+    const leftNumber = Number(left)
+    const rightNumber = Number(right)
+    const numeric = Number.isFinite(leftNumber) && Number.isFinite(rightNumber)
+    if (operator === '=' || operator === '==') return left === right
+    if (operator === '!=') return left !== right
+    if (!numeric) return false
+    if (operator === '-eq') return leftNumber === rightNumber
+    if (operator === '-ne') return leftNumber !== rightNumber
+    if (operator === '-lt') return leftNumber < rightNumber
+    if (operator === '-le') return leftNumber <= rightNumber
+    if (operator === '-gt') return leftNumber > rightNumber
+    if (operator === '-ge') return leftNumber >= rightNumber
+  }
+  return evaluateCondition(expression, env)
+}
+
+function evaluateArithmeticExpression(expr: string, env: Record<string, string>) {
+  const expanded = expandArithmeticVariables(expr, env)
+  if (!/^[\d+\-*/% ().]+$/.test(expanded)) return 0
+  try {
+    const result = Function(`"use strict"; return (${expanded})`)()
+    return Number.isFinite(Number(result)) ? Math.trunc(Number(result)) : 0
+  } catch {
+    return 0
+  }
+}
+
+function expandArithmeticVariables(expr: string, env: Record<string, string>) {
+  return expr.replace(/[A-Za-z_]\w*/g, (name) => env[name] ?? '0')
 }
 
 function stripQuotes(value: string) {
