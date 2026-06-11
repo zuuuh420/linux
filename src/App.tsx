@@ -96,6 +96,15 @@ type EditorState = {
   content: string
 }
 
+class ScriptExit extends Error {
+  code: number
+
+  constructor(code: number) {
+    super(`exit ${code}`)
+    this.code = code
+  }
+}
+
 const BUILTIN_QUESTIONS = questionsData as Question[]
 const RECORDS_KEY = 'linux-mastery:practice-records'
 const IMPORTED_QUESTIONS_KEY = 'linux-mastery:imported-questions'
@@ -1769,82 +1778,86 @@ function runScript(fs: FsDir, cwd: string[], source: string, scriptArgs: string[
   env['#'] = String(scriptArgs.length)
   const lines = normalizeScriptLines(source)
   const output: string[] = []
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index]
-    const cForMatch = line.match(/^for\s*\(\(\s*(.+?)\s*;\s*(.+?)\s*;\s*(.+?)\s*\)\)\s*(?:do)?$/)
-    if (cForMatch) {
-      const body: string[] = []
-      index += 1
-      if (lines[index] === 'do') index += 1
-      while (index < lines.length && lines[index] !== 'done') {
-        body.push(lines[index])
+  try {
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index]
+      const cForMatch = line.match(/^for\s*\(\(\s*(.+?)\s*;\s*(.+?)\s*;\s*(.+?)\s*\)\)\s*(?:do)?$/)
+      if (cForMatch) {
+        const body: string[] = []
         index += 1
-      }
-      runArithmeticStatement(cForMatch[1], env)
-      let guard = 0
-      while (evaluateCondition(cForMatch[2], env)) {
-        body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
-        runArithmeticStatement(cForMatch[3], env)
-        guard += 1
-        if (guard > 10000) throw new Error('bash: loop exceeded lab limit')
-      }
-      continue
-    }
-    const whileMatch = line.match(/^while\s+(.+?)(?:\s+do)?$/)
-    if (whileMatch) {
-      const body: string[] = []
-      index += 1
-      if (lines[index] === 'do') index += 1
-      while (index < lines.length && lines[index] !== 'done') {
-        body.push(lines[index])
-        index += 1
-      }
-      let guard = 0
-      while (evaluateShellCondition(whileMatch[1], env)) {
-        body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
-        guard += 1
-        if (guard > 10000) throw new Error('bash: loop exceeded lab limit')
-      }
-      continue
-    }
-    const ifMatch = line.match(/^if\s+(.+?)(?:\s+then)?$/)
-    if (ifMatch) {
-      const thenBody: string[] = []
-      const elseBody: string[] = []
-      let currentBody = thenBody
-      index += 1
-      if (lines[index] === 'then') index += 1
-      while (index < lines.length && lines[index] !== 'fi') {
-        if (lines[index] === 'else') {
-          currentBody = elseBody
+        if (lines[index] === 'do') index += 1
+        while (index < lines.length && lines[index] !== 'done') {
+          body.push(lines[index])
           index += 1
-          continue
         }
-        currentBody.push(lines[index])
-        index += 1
+        runArithmeticStatement(cForMatch[1], env)
+        let guard = 0
+        while (evaluateCondition(cForMatch[2], env)) {
+          body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
+          runArithmeticStatement(cForMatch[3], env)
+          guard += 1
+          if (guard > 10000) throw new Error('bash: loop exceeded lab limit')
+        }
+        continue
       }
-      const chosenBody = evaluateShellCondition(ifMatch[1], env) ? thenBody : elseBody
-      chosenBody.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
-      continue
-    }
-    const forMatch = line.match(/^for\s+(\w+)\s+in\s+(.+?)(?:\s+do)?$/)
-    if (forMatch) {
-      const body: string[] = []
-      index += 1
-      if (lines[index] === 'do') index += 1
-      while (index < lines.length && lines[index] !== 'done') {
-        body.push(lines[index])
+      const whileMatch = line.match(/^while\s+(.+?)(?:\s+do)?$/)
+      if (whileMatch) {
+        const body: string[] = []
         index += 1
+        if (lines[index] === 'do') index += 1
+        while (index < lines.length && lines[index] !== 'done') {
+          body.push(lines[index])
+          index += 1
+        }
+        let guard = 0
+        while (evaluateShellCondition(whileMatch[1], env)) {
+          body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
+          guard += 1
+          if (guard > 10000) throw new Error('bash: loop exceeded lab limit')
+        }
+        continue
       }
-      const [, variable, valuesText] = forMatch
-      const values = expandForValues(valuesText, env)
-      values.forEach((value) => {
-        env[variable] = value
-        body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
-      })
-      continue
+      const ifMatch = line.match(/^if\s+(.+?)(?:\s+then)?$/)
+      if (ifMatch) {
+        const thenBody: string[] = []
+        const elseBody: string[] = []
+        let currentBody = thenBody
+        index += 1
+        if (lines[index] === 'then') index += 1
+        while (index < lines.length && lines[index] !== 'fi') {
+          if (lines[index] === 'else') {
+            currentBody = elseBody
+            index += 1
+            continue
+          }
+          currentBody.push(lines[index])
+          index += 1
+        }
+        const chosenBody = evaluateShellCondition(ifMatch[1], env) ? thenBody : elseBody
+        chosenBody.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
+        continue
+      }
+      const forMatch = line.match(/^for\s+(\w+)\s+in\s+(.+?)(?:\s+do)?$/)
+      if (forMatch) {
+        const body: string[] = []
+        index += 1
+        if (lines[index] === 'do') index += 1
+        while (index < lines.length && lines[index] !== 'done') {
+          body.push(lines[index])
+          index += 1
+        }
+        const [, variable, valuesText] = forMatch
+        const values = expandForValues(valuesText, env)
+        values.forEach((value) => {
+          env[variable] = value
+          body.forEach((bodyLine) => runScriptLine(fs, cwd, bodyLine, env, output))
+        })
+        continue
+      }
+      runScriptLine(fs, cwd, line, env, output)
     }
-    runScriptLine(fs, cwd, line, env, output)
+  } catch (error) {
+    if (!(error instanceof ScriptExit)) throw error
   }
   return output.join('\n')
 }
@@ -1869,6 +1882,12 @@ function normalizeScriptLines(source: string) {
 }
 
 function runScriptLine(fs: FsDir, cwd: string[], line: string, env: Record<string, string>, output: string[]) {
+  const exitMatch = line.match(/^exit(?:\s+(.+))?$/)
+  if (exitMatch) {
+    const codeText = exitMatch[1] ? expandShell(evaluateArithmetic(exitMatch[1], env), env) : '0'
+    env['?'] = String(Number(codeText) || 0)
+    throw new ScriptExit(Number(codeText) || 0)
+  }
   const assignment = line.match(/^([A-Za-z_]\w*)=(.*)$/)
   if (assignment && !line.startsWith('echo ')) {
     env[assignment[1]] = stripQuotes(expandShell(evaluateArithmetic(expandCommandSubstitution(assignment[2], env), env), env))
